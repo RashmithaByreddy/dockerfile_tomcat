@@ -29,7 +29,8 @@ RUN chmod +x ${CATALINA_HOME}/bin/*sh
 
 WORKDIR /opt/tomcat
 
-VOLUME /opt/tomcat
+VOLUME /opt/tomcat/webapps
+VOLUME /opt/tomcat/logs
 
 EXPOSE 8080
 EXPOSE 8009
