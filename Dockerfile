@@ -32,4 +32,4 @@ WORKDIR /opt/tomcat
 EXPOSE 8080
 EXPOSE 8009
 
-CMD ["startup.sh"]
+#CMD ["startup.sh"]
