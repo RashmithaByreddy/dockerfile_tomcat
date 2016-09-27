@@ -1,14 +1,11 @@
-FROM openjdk:7-jre
-
+FROM openjdk:8-jre
 ENV CATALINA_HOME /usr/local/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p "$CATALINA_HOME"
 WORKDIR $CATALINA_HOME
-
 # let "Tomcat Native" live somewhere isolated
 ENV TOMCAT_NATIVE_LIBDIR $CATALINA_HOME/native-jni-lib
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$TOMCAT_NATIVE_LIBDIR
-
 # runtime dependencies for Tomcat Native Libraries
 # Tomcat Native 1.2+ requires a newer version of OpenSSL than debian:jessie has available (1.0.2g+)
 # see http://tomcat.10.x6.nabble.com/VOTE-Release-Apache-Tomcat-8-0-32-tp5046007p5046024.html (and following discussion)
@@ -31,7 +28,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libapr1 \
 		openssl="$OPENSSL_VERSION" \
 	&& rm -rf /var/lib/apt/lists/*
-
 # see https://www.apache.org/dist/tomcat/tomcat-8/KEYS
 RUN set -ex \
 	&& for key in \
@@ -51,15 +47,12 @@ RUN set -ex \
 	; do \
 		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 	done
-
 ENV TOMCAT_MAJOR 7
 ENV TOMCAT_VERSION 7.0.72
-
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
 ENV TOMCAT_TGZ_URL https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz
 # not all the mirrors actually carry the .asc files :'(
 ENV TOMCAT_ASC_URL https://www.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz.asc
-
 RUN set -x \
 	\
 	&& wget -O tomcat.tar.gz "$TOMCAT_TGZ_URL" \
@@ -94,7 +87,6 @@ RUN set -x \
 	&& apt-get purge -y --auto-remove $nativeBuildDeps \
 	&& rm -rf "$nativeBuildDir" \
 	&& rm bin/tomcat-native.tar.gz
-
 # verify Tomcat Native is working properly
 RUN set -e \
 	&& nativeLines="$(catalina.sh configtest 2>&1)" \
@@ -104,6 +96,5 @@ RUN set -e \
 		echo >&2 "$nativeLines"; \
 		exit 1; \
 	fi
-
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
